@@ -1,24 +1,43 @@
 name: Go
-on: [push]
+on:
+  push:
+    branches: [master]
+  pull_request:
+
 jobs:
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+
+      - run: echo "::add-path::$(go env GOPATH)/bin"
+
+      - run: |
+          go get \
+            golang.org/x/tools/cmd/goimports \
+            github.com/mgechev/revive
+
+      - uses: actions/checkout@v2
+
+      - run: goimports -d .
+      - run: revive -config revive.toml ./...
+
 
   build:
     name: Build
     runs-on: ubuntu-latest
+    needs : [lint]
     steps:
 
-    - name: Set up Go 1.13
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.13
-      id: go
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Get dependencies
-      run: |
-        go get -v -t -d ./...
-
-    - name: Build
-      run: go build -v .
+      - name: Build
+        run: go build -v .

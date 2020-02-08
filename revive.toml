@@ -1,0 +1,46 @@
+ignoreGeneratedHeader = false
+severity = "error"
+confidence = 0.8
+errorCode = 1
+warningCode = 0
+
+[line-length-limit]
+  arguments = [100]
+
+
+[rule.blank-imports]
+[rule.confusing-naming]
+[rule.confusing-results]
+[rule.context-as-argument]
+[rule.context-keys-type]
+[rule.deep-exit]
+[rule.dot-imports]
+[rule.empty-block]
+[rule.empty-lines]
+[rule.error-naming]
+[rule.error-return]
+[rule.error-strings]
+[rule.errorf]
+[rule.exported]
+[rule.get-return]
+[rule.if-return]
+[rule.import-shadowing]
+[rule.increment-decrement]
+[rule.indent-error-flow]
+[rule.modifies-parameter]
+[rule.modifies-value-receiver]
+[rule.package-comments]
+[rule.range]
+[rule.receiver-naming]
+[rule.redefines-builtin-id]
+[rule.struct-tag]
+[rule.superfluous-else]
+[rule.time-naming]
+[rule.unexported-return]
+[rule.unhandled-error]
+[rule.unnecessary-stmt]
+[rule.unreachable-code]
+[rule.unused-parameter]
+[rule.unused-receiver]
+[rule.var-declaration]
+[rule.var-naming]
