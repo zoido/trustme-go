@@ -21,6 +21,10 @@ jobs:
             golang.org/x/tools/cmd/goimports \
             github.com/mgechev/revive
 
+      - run: |
+          pwd
+          ls -l -R *
+
       - run: goimports -d .
       - run: revive -config revive.toml ./...
 
