@@ -17,7 +17,7 @@ func MustCreateNewCA(t *testing.T, options ...ca.Option) *CA {
 	c, err := ca.New(options...)
 
 	if err != nil {
-		testing.Error(err)
+		t.Error(err)
 	}
 
 	return &CA{
