@@ -19,8 +19,8 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - run: ${GOBIN}/goimports -d .
-      - run: ${GOBIN}/revive -config revive.toml ./...
+      - run: ${GOPATH}/bin/goimports -d .
+      - run: ${GOPATH}/bin/revive -config revive.toml ./...
 
 
   build:
