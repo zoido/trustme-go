@@ -7,6 +7,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/zoido/trustme-go/cert"
@@ -16,8 +17,9 @@ import (
 type CA struct {
 	Cert *cert.LeafCert
 
-	cfg    *Config
-	serial int64
+	cfg       *Config
+	serial    *big.Int
+	serialInc *big.Int
 }
 
 // Option configures the CA.
@@ -34,15 +36,19 @@ type Config struct {
 
 // New returns new instance of th CA.
 func New(options ...Option) (*CA, error) {
-	cfg := &Config{}
+	cfg := &Config{
+		RSABits: 2048,
+	}
 	for _, opt := range options {
 		opt(cfg)
 	}
 
 	ca := &CA{
-		Cert:   &cert.LeafCert{},
-		serial: 1,
-		cfg:    cfg,
+		Cert: &cert.LeafCert{},
+		cfg:  cfg,
+
+		serial:    big.NewInt(1000),
+		serialInc: big.NewInt(1),
 	}
 
 	err := ca.initialize()
@@ -104,7 +110,7 @@ func (ca *CA) Issue(options ...cert.Option) (*cert.LeafCert, error) {
 
 	leaf, err := ca.issueCertificate(cfg)
 	if err == nil {
-		ca.serial++
+		ca.serial.Add(ca.serial, ca.serialInc)
 	}
 
 	return leaf, err
@@ -119,10 +125,14 @@ func (ca *CA) issueCertificate(cfg cert.Config) (*cert.LeafCert, error) {
 		return nil, fmt.Errorf("generating the private key: %w", err)
 	}
 
-	csr, err := generateCSR(cfg, *leaf.Key)
+	csr, err := generateCSR(cfg, leaf.Key)
+	if err != nil {
+		return nil, err
+	}
 
 	template := x509.Certificate{
-		Subject: csr.Subject,
+		Subject:      csr.Subject,
+		SerialNumber: ca.serial,
 
 		NotBefore: time.Now(),
 		NotAfter:  time.Now().Add(cfg.TTL),
@@ -169,6 +179,8 @@ func (ca *CA) initialize() error {
 			CommonName:   ca.cfg.CommonName,
 			Organization: []string{ca.cfg.Organization},
 		},
+		SerialNumber: big.NewInt(1),
+
 		NotBefore: time.Now(),
 		NotAfter:  time.Now().Add(ca.cfg.TTL),
 
@@ -198,7 +210,7 @@ func generateKey(bits int) (*rsa.PrivateKey, error) {
 	return key, nil
 }
 
-func generateCSR(cfg cert.Config, key rsa.PrivateKey) (*x509.CertificateRequest, error) {
+func generateCSR(cfg cert.Config, key *rsa.PrivateKey) (*x509.CertificateRequest, error) {
 	subject := pkix.Name{
 		CommonName:   cfg.CommonName,
 		Organization: []string{cfg.Organization},
