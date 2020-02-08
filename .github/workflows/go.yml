@@ -21,7 +21,7 @@ jobs:
         uses: actions/cache@v1
         id: cachelinters
         with:
-          path: ~/go/pkg/bin
+          path: ~/go/bin
           key: ${{ runner.os }}-linters
           restore-keys: |
             ${{ runner.os }}-linters
