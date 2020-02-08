@@ -41,7 +41,10 @@ jobs:
         run: goimports -d .
       - name: revive
         run: revive -config revive.toml ./...
-
+      - name: markdownlint
+        uses: nosborn/github-action-markdown-cli@v1.1.1
+        with:
+          files: .
 
   build:
     name: Build
