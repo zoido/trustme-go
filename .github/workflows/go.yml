@@ -14,13 +14,15 @@ jobs:
         with:
           go-version: 1.13
 
-      - run: go get golang.org/x/tools/cmd/goimports
-      - run: go get -u github.com/mgechev/revive
+      - run: echo "::add-path::$(go env GOPATH)/bin"
 
-      - uses: actions/checkout@v2
+      - run: |
+          go get \
+            golang.org/x/tools/cmd/goimports \
+            github.com/mgechev/revive
 
-      - run: ${GOPATH}/bin/goimports -d .
-      - run: ${GOPATH}/bin/revive -config revive.toml ./...
+      - run: goimports -d .
+      - run: revive -config revive.toml ./...
 
 
   build:
