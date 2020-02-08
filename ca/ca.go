@@ -14,12 +14,9 @@ import (
 
 // CA is a fake certification authority for issuing TLS certificates for tests.
 type CA struct {
-	Certificate      *x509.Certificate
-	CertificateBytes []byte
-	Key              *rsa.PrivateKey
+	Cert *cert.LeafCert
 
-	cfg Config
-
+	cfg    *Config
 	serial int64
 }
 
@@ -43,8 +40,9 @@ func New(options ...Option) (*CA, error) {
 	}
 
 	ca := &CA{
+		Cert:   &cert.LeafCert{},
 		serial: 1,
-		cfg:    *cfg,
+		cfg:    cfg,
 	}
 
 	err := ca.initialize()
@@ -92,21 +90,27 @@ func WithOrganization(organization string) Option {
 }
 
 // Issue issues new certificate signed by the CA.
-func (fca *CA) Issue(options ...cert.Option) (*cert.LeafCert, error) {
+func (ca *CA) Issue(options ...cert.Option) (*cert.LeafCert, error) {
 	cfg := cert.Config{
-		RSABits: fca.cfg.RSABits,
-		TTL:     fca.cfg.TTL,
+		RSABits: ca.cfg.RSABits,
+		TTL:     ca.cfg.TTL,
 
-		CommonName:   fmt.Sprintf("%s: certificate #%d", fca.cfg.CommonName, fca.serial),
-		Organization: fca.cfg.Organization,
+		CommonName:   fmt.Sprintf("%s: certificate #%d", ca.cfg.CommonName, ca.serial),
+		Organization: ca.cfg.Organization,
 	}
 	for _, opt := range options {
 		opt(&cfg)
 	}
-	return fca.issueCertificate(cfg)
+
+	leaf, err := ca.issueCertificate(cfg)
+	if err == nil {
+		ca.serial++
+	}
+
+	return leaf, err
 }
 
-func (fca *CA) issueCertificate(cfg cert.Config) (*cert.LeafCert, error) {
+func (ca *CA) issueCertificate(cfg cert.Config) (*cert.LeafCert, error) {
 	var err error
 	leaf := &cert.LeafCert{}
 
@@ -128,7 +132,7 @@ func (fca *CA) issueCertificate(cfg cert.Config) (*cert.LeafCert, error) {
 		PublicKeyAlgorithm: csr.PublicKeyAlgorithm,
 		PublicKey:          csr.PublicKey,
 
-		Issuer: fca.Certificate.Issuer,
+		Issuer: ca.Cert.Certificate.Issuer,
 
 		KeyUsage: x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 		ExtKeyUsage: []x509.ExtKeyUsage{
@@ -138,8 +142,8 @@ func (fca *CA) issueCertificate(cfg cert.Config) (*cert.LeafCert, error) {
 		BasicConstraintsValid: true,
 	}
 
-	leaf.CertificateBytes, err = x509.CreateCertificate(rand.Reader, &template, fca.Certificate,
-		csr.PublicKey, fca.Key)
+	leaf.CertificateBytes, err = x509.CreateCertificate(rand.Reader, &template, ca.Cert.Certificate,
+		csr.PublicKey, ca.Cert.Key)
 	if err != nil {
 		return nil, fmt.Errorf("generating CA certificate: %w", err)
 	}
@@ -152,34 +156,34 @@ func (fca *CA) issueCertificate(cfg cert.Config) (*cert.LeafCert, error) {
 	return leaf, nil
 }
 
-func (fca *CA) initialize() error {
+func (ca *CA) initialize() error {
 	var err error
 
-	fca.Key, err = generateKey(fca.cfg.RSABits)
+	ca.Cert.Key, err = generateKey(ca.cfg.RSABits)
 	if err != nil {
 		return fmt.Errorf("generating CA private key: %w", err)
 	}
 
 	template := x509.Certificate{
 		Subject: pkix.Name{
-			CommonName:   fca.cfg.CommonName,
-			Organization: []string{fca.cfg.Organization},
+			CommonName:   ca.cfg.CommonName,
+			Organization: []string{ca.cfg.Organization},
 		},
 		NotBefore: time.Now(),
-		NotAfter:  time.Now().Add(fca.cfg.TTL),
+		NotAfter:  time.Now().Add(ca.cfg.TTL),
 
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
 		IsCA:                  true,
 		BasicConstraintsValid: true,
 	}
 
-	fca.CertificateBytes, err = x509.CreateCertificate(rand.Reader, &template, &template,
-		&fca.Key.PublicKey, fca.Key)
+	certificateBytes, err := x509.CreateCertificate(rand.Reader, &template, &template,
+		&ca.Cert.Key.PublicKey, ca.Cert.Key)
 	if err != nil {
 		return fmt.Errorf("generating CA certificate: %w", err)
 	}
 
-	fca.Certificate, err = x509.ParseCertificate(fca.CertificateBytes)
+	ca.Cert.Certificate, err = x509.ParseCertificate(certificateBytes)
 	if err != nil {
 		return fmt.Errorf("parsing generated CA certificate: %w", err)
 	}
