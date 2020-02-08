@@ -13,15 +13,15 @@ type CA struct {
 }
 
 // MustCreateNewCA returns new instance of th CA and fails the test when creation fails.
-func MustCreateNewCA(testing *testing.T, options ...ca.Option) *CA {
-	ca, err := ca.New(options...)
+func MustCreateNewCA(t *testing.T, options ...ca.Option) *CA {
+	c, err := ca.New(options...)
 
 	if err != nil {
 		testing.Error(err)
 	}
 
 	return &CA{
-		ca:      ca,
-		testing: testing,
+		ca:      c,
+		testing: t,
 	}
 }
