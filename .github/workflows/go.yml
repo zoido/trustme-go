@@ -14,17 +14,33 @@ jobs:
         with:
           go-version: 1.13
 
-      - run: echo "::add-path::$(go env GOPATH)/bin"
+      - name: setup environment
+        run: echo "::add-path::$(go env GOPATH)/bin"
 
-      - run: |
+      - name: cache linters
+        uses: actions/cache@v1
+        id: cache-linters
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-linters
+          restore-keys: |
+            ${{ runner.os }}-linters
+
+
+      - name: install linters
+        run: |
           go get \
             golang.org/x/tools/cmd/goimports \
             github.com/mgechev/revive
+        if: steps.cache-linters.outputs.cache-hit != 'true'
 
-      - uses: actions/checkout@v2
+      - name: check out code
+        uses: actions/checkout@v2
 
-      - run: goimports -d .
-      - run: revive -config revive.toml ./...
+      - name: goimports
+        run: goimports -d .
+      - name: revive
+        run: revive -config revive.toml ./...
 
 
   build:
@@ -39,5 +55,5 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Build
+      - name: build
         run: go build -v .
