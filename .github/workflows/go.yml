@@ -14,6 +14,9 @@ jobs:
         with:
           go-version: 1.13
 
+      - name: setup environment
+        run: echo "::add-path::$(go env GOPATH)/bin"
+
       - name: install linters
         uses: actions/cache@v1
         id: cache-linters
@@ -23,7 +26,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-linters
 
-      - run: echo "::add-path::$(go env GOPATH)/bin"
 
       - name: install linters
         run: |
