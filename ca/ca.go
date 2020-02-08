@@ -37,7 +37,10 @@ type Config struct {
 // New returns new instance of th CA.
 func New(options ...Option) (*CA, error) {
 	cfg := &Config{
-		RSABits: 2048,
+		RSABits:      2048,
+		TTL:          time.Minute,
+		CommonName:   "trustme-go",
+		Organization: "trustme-go Org.",
 	}
 	for _, opt := range options {
 		opt(cfg)
