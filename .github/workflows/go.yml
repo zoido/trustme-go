@@ -17,7 +17,7 @@ jobs:
       - name: setup environment
         run: echo "::add-path::$(go env GOPATH)/bin"
 
-      - name: install linters
+      - name: cache linters
         uses: actions/cache@v1
         id: cache-linters
         with:
