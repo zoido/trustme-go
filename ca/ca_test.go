@@ -220,7 +220,7 @@ func (s *CATestSuite) TestCA_Issue_DefaultRSaBits_Effective() {
 
 func (s *CATestSuite) TestCA_Issue_DefaultCommonName_Effective() {
 	// Given
-	a, err := ca.New(ca.WithCommonName("test-CN"))
+	a := s.mustCreateCA(ca.WithCommonName("test-CN"))
 
 	// When
 	crt, err := a.Issue()
@@ -235,7 +235,7 @@ func (s *CATestSuite) TestCA_Issue_DefaultCommonName_Effective() {
 
 func (s *CATestSuite) TestCA_Issue_DefaultOrganization_Effective() {
 	// Given
-	a, err := ca.New(ca.WithOrganization("Trust Me, Org."))
+	a := s.mustCreateCA(ca.WithOrganization("Trust Me, Org."))
 
 	// When
 	crt, err := a.Issue()
@@ -269,7 +269,7 @@ func (s *CATestSuite) TestCA_Issue_MultipleDefaultOptions_Effective() {
 
 func (s *CATestSuite) TestCA_Issue_WithOptionsDefalts_Effective() {
 	// Given
-	a, err := ca.New(ca.WithOptions(
+	a := s.mustCreateCA(ca.WithOptions(
 		ca.WithRSABits(1024),
 		ca.WithTTL(time.Minute*123),
 	))

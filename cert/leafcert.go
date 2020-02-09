@@ -15,7 +15,7 @@ type LeafCert struct {
 	KeyBytes []byte
 }
 
-// Config holds the configration of the issueing of the cingle certificate.
+// Config holds the configration of the issuing of the single certificate.
 type Config struct {
 	TTL     time.Duration
 	RSABits int
