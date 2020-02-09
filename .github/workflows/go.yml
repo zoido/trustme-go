@@ -39,8 +39,10 @@ jobs:
 
       - name: goimports
         run: goimports -d .
+
       - name: revive
-        run: revive -config revive.toml ./...
+        run: revive -config ci/revive.toml ./...
+
       - name: markdownlint
         uses: nosborn/github-action-markdown-cli@v1.1.1
         with:
@@ -108,4 +110,5 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          yml: ./ci/codecov.yml
           file: ./coverage.txt
