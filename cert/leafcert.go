@@ -27,8 +27,8 @@ type Config struct {
 // Option configures the issued certificate.
 type Option func(cfg *Config)
 
-// WithLeafOptions turns a list of LeafOption instances into an LeafOption.
-func WithLeafOptions(opts ...Option) Option {
+// WithOptions turns a list of LeafOption instances into an LeafOption.
+func WithOptions(opts ...Option) Option {
 	return func(cfg *Config) {
 		for _, opt := range opts {
 			opt(cfg)
