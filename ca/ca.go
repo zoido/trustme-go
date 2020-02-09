@@ -153,6 +153,11 @@ func (ca *CA) issueCertificate(cfg cert.Config) (*cert.LeafCert, error) {
 			x509.ExtKeyUsageClientAuth,
 		},
 		BasicConstraintsValid: true,
+
+		DNSNames:       cfg.DNSNames,
+		IPAddresses:    cfg.IPAddresses,
+		EmailAddresses: cfg.EmailAddresses,
+		URIs:           cfg.URIs,
 	}
 
 	leaf.CertificateBytes, err = x509.CreateCertificate(rand.Reader, &template, ca.Cert.Certificate,

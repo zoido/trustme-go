@@ -63,3 +63,31 @@ func WithCommonName(commonName string) Option {
 		cfg.CommonName = commonName
 	}
 }
+
+// WithDNS configures DNS names SANs of the issued certificate. Can be used multiple times.
+func WithDNS(name string) Option {
+	return func(cfg *Config) {
+		cfg.DNSNames = append(cfg.DNSNames, name)
+	}
+}
+
+// WithIP configures DNS names SANs of the issued certificate. Can be used multiple times.
+func WithIP(ipAddress net.IP) Option {
+	return func(cfg *Config) {
+		cfg.IPAddresses = append(cfg.IPAddresses, ipAddress)
+	}
+}
+
+// WithEmail configures e-mail adresses SANs of the issued certificate. Can be used multiple times.
+func WithEmail(email string) Option {
+	return func(cfg *Config) {
+		cfg.EmailAddresses = append(cfg.EmailAddresses, email)
+	}
+}
+
+// WithURI configures URIs SANs of the issued certificate. Can be used multiple times.
+func WithURI(uri *url.URL) Option {
+	return func(cfg *Config) {
+		cfg.URIs = append(cfg.URIs, uri)
+	}
+}

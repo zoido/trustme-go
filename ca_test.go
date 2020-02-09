@@ -3,6 +3,8 @@ package trustme_test
 import (
 	"crypto/x509"
 	"math/big"
+	"net"
+	"net/url"
 	"testing"
 	"time"
 
@@ -319,7 +321,8 @@ func (s *CATestSuite) TestCA_Issue_WithCommonName_Effective() {
 		"Certificate should have CN set via options",
 	)
 }
-func (s *CATestSuite) TestCA_Issue_Multipleptions_Effective() {
+
+func (s *CATestSuite) TestCA_Issue_MultipleOptions_Effective() {
 	// Given
 	fca := trustme.New(s.T())
 
@@ -354,6 +357,88 @@ func (s *CATestSuite) TestCA_Issue_WithOptions_Effective() {
 	s.Require().Equal(
 		time.Minute*123, crt.Certificate.NotAfter.Sub(crt.Certificate.NotBefore),
 		"Certificate should have TTL set via CA options",
+	)
+}
+
+func (s *CATestSuite) TestCA_Issue_WithDNS_Effective() {
+	// Given
+	fca := trustme.New(s.T())
+
+	// When
+	crt := fca.MustIssue(
+		cert.WithDNS("dns.a"),
+		cert.WithDNS("dns.b"),
+	)
+
+	// Then
+	s.Require().ElementsMatch(
+		crt.Certificate.DNSNames, []string{"dns.a", "dns.b"},
+		"Certificate should have DNS names SAN set via options",
+	)
+}
+
+func (s *CATestSuite) TestCA_Issue_WithIP_Effective() {
+	// Given
+	fca := trustme.New(s.T())
+
+	// When
+	crt := fca.MustIssue(
+		cert.WithIP(net.IPv4(127, 0, 0, 1)),
+	)
+
+	// Then
+	certIPs := make([]string, 0, len(crt.Certificate.IPAddresses))
+	for _, ip := range crt.Certificate.IPAddresses {
+		certIPs = append(certIPs, ip.String())
+	}
+	s.Require().ElementsMatch(
+		certIPs, []string{"8.8.8.8", "127.0.0.1", "::1"},
+		"Certificate should have IP addresses names SAN set via options",
+	)
+}
+
+func (s *CATestSuite) TestCA_Issue_WithEmail_Effective() {
+	// Given
+	fca := trustme.New(s.T())
+
+	// When
+	crt := fca.MustIssue(
+		cert.WithEmail("example@example.com"),
+		cert.WithEmail("test@example.com"),
+	)
+
+	// Then
+	s.Require().ElementsMatch(
+		crt.Certificate.EmailAddresses, []string{"example@example.com", "test@example.com"},
+		"Certificate should have email addresses names SAN set via options",
+	)
+}
+
+func (s *CATestSuite) TestCA_Issue_WithURI_Effective() {
+	// Given
+	fca := trustme.New(s.T())
+
+	uri1 := &url.URL{
+		Scheme: "https",
+		Host:   "example.com",
+		Path:   "/test/path",
+	}
+	uri2 := &url.URL{
+		Scheme: "spiffe",
+		Host:   "trust.domain",
+		Path:   "/test/path",
+	}
+
+	// When
+	crt := fca.MustIssue(
+		cert.WithURI(uri1),
+		cert.WithURI(uri2),
+	)
+
+	// Then
+	s.Require().ElementsMatch(
+		crt.Certificate.URIs, []*url.URL{uri1, uri2},
+		"Certificate should have email addresses names SAN set via options",
 	)
 }
 
