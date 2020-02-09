@@ -383,6 +383,8 @@ func (s *CATestSuite) TestCA_Issue_WithIP_Effective() {
 
 	// When
 	crt := fca.MustIssue(
+		cert.WithIP(net.IPv6loopback),
+		cert.WithIP(net.IPv4(8, 8, 8, 8)),
 		cert.WithIP(net.IPv4(127, 0, 0, 1)),
 	)
 
