@@ -31,11 +31,13 @@ func New(t *testing.T, options ...ca.Option) *CA {
 	}
 }
 
-func (fca *CA) Certificate(options ...cert.Option) *x509.Certificate {
+// Certificate returns public certificate of underlying fake CA.
+func (fca *CA) Certificate() *x509.Certificate {
 	return fca.ca.Cert.Certificate
 }
 
-func (fca *CA) Key(options ...cert.Option) *rsa.PrivateKey {
+// Key returns private key of underlying fake CA.
+func (fca *CA) Key() *rsa.PrivateKey {
 	return fca.ca.Cert.Key
 }
 
