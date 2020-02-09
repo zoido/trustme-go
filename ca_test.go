@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/zoido/trustme-go"
 	"github.com/zoido/trustme-go/ca"
+	"github.com/zoido/trustme-go/cert"
 )
 
 type CATestSuite struct {
@@ -32,11 +33,11 @@ func (s *CATestSuite) TestCA_CertProperties() {
 	fca := trustme.New(s.T())
 
 	// Then
-	s.Require().True(fca.Certificate().IsCA, "Certificate should be CA")
+	s.Require().True(fca.Certificate().IsCA, "CA certificate should be CA")
 	s.Require().Equal(
 		x509.KeyUsageKeyEncipherment|x509.KeyUsageDigitalSignature|x509.KeyUsageCertSign,
 		fca.Certificate().KeyUsage,
-		"Certificate should have proper usage set",
+		"CA certificate should have proper usage set",
 	)
 }
 
@@ -80,7 +81,7 @@ func (s *CATestSuite) TestCA_WithRSABits_Effective() {
 	fca := trustme.New(s.T(), ca.WithRSABits(512))
 
 	// Then
-	s.Require().Equal(512/8, fca.Key().Size(), "Key should have size set via options")
+	s.Require().Equal(512/8, fca.Key().Size(), "CA key should have size set via options")
 }
 
 func (s *CATestSuite) TestCA_WithCommonName_Effective() {
@@ -118,16 +119,16 @@ func (s *CATestSuite) TestCA_MultipleOptions_Effective() {
 	// Then
 	s.Require().Equal(
 		"Trust Me, Org.", fca.Certificate().Subject.Organization[0],
-		"Certificate should have O set via options",
+		"CA certificate should have O set via options",
 	)
 	s.Require().Equal(
 		"test-CN", fca.Certificate().Subject.CommonName,
-		"Certificate should have CN set via options",
+		"CA certificate should have CN set via options",
 	)
-	s.Require().Equal(1024/8, fca.Key().Size(), "Key should have size set via options")
+	s.Require().Equal(1024/8, fca.Key().Size(), "CA key should have size set via options")
 	s.Require().Equal(
 		time.Minute*123, fca.Certificate().NotAfter.Sub(fca.Certificate().NotBefore),
-		"Certificate should have TTL set via CA options",
+		"CA certificate should have TTL set via CA options",
 	)
 }
 
@@ -142,10 +143,10 @@ func (s *CATestSuite) TestCA_WithOptions_Effective() {
 	)
 
 	// Then
-	s.Require().Equal(1024/8, fca.Key().Size(), "Key should have size set via options")
+	s.Require().Equal(1024/8, fca.Key().Size(), "CA key should have size set via options")
 	s.Require().Equal(
 		time.Minute*123, fca.Certificate().NotAfter.Sub(fca.Certificate().NotBefore),
-		"Certificate should have TTL set via CA options",
+		"CA certificate should have TTL set via CA options",
 	)
 }
 
@@ -273,9 +274,49 @@ func (s *CATestSuite) TestCA_Issue_WithOptionsDefalts_Effective() {
 	crt := fca.MustIssue()
 
 	// Then
+	s.Require().Equal(1024/8, crt.Key.Size(), "Key should have size set via options")
 	s.Require().Equal(
 		time.Minute*123, crt.Certificate.NotAfter.Sub(crt.Certificate.NotBefore),
 		"Certificate should have TTL set via CA options",
+	)
+}
+
+func (s *CATestSuite) TestCA_Issue_WithTTL_Effective() {
+	// Given
+	fca := trustme.New(s.T())
+
+	// When
+	crt := fca.MustIssue(cert.WithTTL(time.Hour * 123))
+
+	// Then
+	s.Require().Equal(
+		time.Hour*123, crt.Certificate.NotAfter.Sub(crt.Certificate.NotBefore),
+		"Certificate should have TTL set via options",
+	)
+}
+
+func (s *CATestSuite) TestCA_Issue_WithRSABits_Effective() {
+	// Given
+	fca := trustme.New(s.T())
+
+	// When
+	crt := fca.MustIssue(cert.WithRSABits(1024))
+
+	// Then
+	s.Require().Equal(1024/8, crt.Key.Size(), "Key should have size set via options")
+}
+
+func (s *CATestSuite) TestCA_Issue_WithCommonName_Effective() {
+	// Given
+	fca := trustme.New(s.T())
+
+	// When
+	crt := fca.MustIssue(cert.WithCommonName("cert-test-CN"))
+
+	// Then
+	s.Require().Equal(
+		"cert-test-CN", crt.Certificate.Subject.CommonName,
+		"Certificate should have CN set via options",
 	)
 }
 

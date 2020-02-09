@@ -35,3 +35,24 @@ func WithOptions(opts ...Option) Option {
 		}
 	}
 }
+
+// WithTTL configures time to live for the CA and issued certificates.
+func WithTTL(ttl time.Duration) Option {
+	return func(cfg *Config) {
+		cfg.TTL = ttl
+	}
+}
+
+// WithRSABits configures the length of RSA private key of the CA and the issued certificates.
+func WithRSABits(rsaBits int) Option {
+	return func(cfg *Config) {
+		cfg.RSABits = rsaBits
+	}
+}
+
+// WithCommonName configures the CA's common name.
+func WithCommonName(commonName string) Option {
+	return func(cfg *Config) {
+		cfg.CommonName = commonName
+	}
+}
