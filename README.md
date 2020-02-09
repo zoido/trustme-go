@@ -4,6 +4,7 @@
 
 ![Go](https://github.com/zoido/trustme-go/workflows/Go/badge.svg)
 [![codecov](https://codecov.io/gh/zoido/trustme-go/branch/master/graph/badge.svg)](https://codecov.io/gh/zoido/trustme-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/zoido/trustme-go)](https://goreportcard.com/report/github.com/zoido/trustme-go)
 
 Inspired by [trustme](https://github.com/python-trio/trustme) for [Python](https://www.python.org/).
 
