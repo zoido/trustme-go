@@ -106,9 +106,7 @@ jobs:
           go test -v \
             -coverprofile=coverage.txt \
             -covermode=atomic \
-            -coverpkg=github.com/zoido/trustme-go,\
-              github.com/zoido/trustme-go/ca,\
-              github.com/zoido/trustme-go/cert \
+            -coverpkg=./... \
             ./...
 
       - name: collect code coverage
