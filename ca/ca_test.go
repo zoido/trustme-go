@@ -110,6 +110,48 @@ func (s *CATestSuite) TestCA_WithOrganization_Effective() {
 	)
 }
 
+func (s *CATestSuite) TestCA_MultipleOptions_Effective() {
+	// When
+	a, err := ca.New(
+		ca.WithOrganization("Trust Me, Org."),
+		ca.WithCommonName("test-CN"),
+		ca.WithRSABits(1024),
+		ca.WithTTL(time.Minute*123),
+	)
+
+	// Then
+	s.Require().NoError(err)
+	s.Require().Equal(
+		"Trust Me, Org.", a.Cert.Certificate.Subject.Organization[0],
+		"Certificate should have O set via options",
+	)
+	s.Require().Equal(
+		"test-CN", a.Cert.Certificate.Subject.CommonName,
+		"Certificate should have CN set via options",
+	)
+	s.Require().Equal(1024/8, a.Cert.Key.Size(), "Key should have size set via options")
+	s.Require().Equal(
+		time.Minute*123, a.Cert.Certificate.NotAfter.Sub(a.Cert.Certificate.NotBefore),
+		"Certificate should have TTL set via CA options",
+	)
+}
+
+func (s *CATestSuite) TestCA_WithOptions_Effective() {
+	// When
+	a, err := ca.New(ca.WithOptions(
+		ca.WithRSABits(1024),
+		ca.WithTTL(time.Minute*123),
+	))
+
+	// Then
+	s.Require().NoError(err)
+	s.Require().Equal(1024/8, a.Cert.Key.Size(), "Key should have size set via options")
+	s.Require().Equal(
+		time.Minute*123, a.Cert.Certificate.NotAfter.Sub(a.Cert.Certificate.NotBefore),
+		"Certificate should have TTL set via CA options",
+	)
+}
+
 func (s *CATestSuite) TestCA_Issue_Ok() {
 	// Given
 	a := s.mustCreateCA()
@@ -203,6 +245,44 @@ func (s *CATestSuite) TestCA_Issue_DefaultOrganization_Effective() {
 	s.Require().Equal(
 		"Trust Me, Org.", crt.Certificate.Subject.Organization[0],
 		"Certificate should have O set via options",
+	)
+}
+
+func (s *CATestSuite) TestCA_Issue_MultipleDefaultOptions_Effective() {
+	// Given
+	a := s.mustCreateCA(
+		ca.WithRSABits(1024),
+		ca.WithTTL(time.Minute*123),
+	)
+
+	// When
+	crt, err := a.Issue()
+
+	// Then
+	s.Require().NoError(err)
+	s.Require().Equal(1024/8, crt.Key.Size(), "Key should have size set via options")
+	s.Require().Equal(
+		time.Minute*123, crt.Certificate.NotAfter.Sub(crt.Certificate.NotBefore),
+		"Certificate should have TTL set via CA options",
+	)
+}
+
+func (s *CATestSuite) TestCA_Issue_WithOptionsDefalts_Effective() {
+	// Given
+	a, err := ca.New(ca.WithOptions(
+		ca.WithRSABits(1024),
+		ca.WithTTL(time.Minute*123),
+	))
+
+	// When
+	crt, err := a.Issue()
+
+	// Then
+	s.Require().NoError(err)
+	s.Require().Equal(1024/8, crt.Key.Size(), "Key should have size set via options")
+	s.Require().Equal(
+		time.Minute*123, crt.Certificate.NotAfter.Sub(crt.Certificate.NotBefore),
+		"Certificate should have TTL set via CA options",
 	)
 }
 

@@ -61,8 +61,8 @@ func New(options ...Option) (*CA, error) {
 	return ca, nil
 }
 
-// WithCAOptions turns a list of CAOption instances into an CAOption.
-func WithCAOptions(opts ...Option) Option {
+// WithOptions turns a list of CAOption instances into an CAOption.
+func WithOptions(opts ...Option) Option {
 	return func(cfg *Config) {
 		for _, opt := range opts {
 			opt(cfg)
