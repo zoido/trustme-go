@@ -319,6 +319,43 @@ func (s *CATestSuite) TestCA_Issue_WithCommonName_Effective() {
 		"Certificate should have CN set via options",
 	)
 }
+func (s *CATestSuite) TestCA_Issue_Multipleptions_Effective() {
+	// Given
+	fca := trustme.New(s.T())
+
+	// When
+	crt := fca.MustIssue(
+		cert.WithRSABits(1024),
+		cert.WithTTL(time.Minute*123),
+	)
+
+	// Then
+	s.Require().Equal(1024/8, crt.Key.Size(), "Key should have size set via options")
+	s.Require().Equal(
+		time.Minute*123, crt.Certificate.NotAfter.Sub(crt.Certificate.NotBefore),
+		"Certificate should have TTL set via CA options",
+	)
+}
+
+func (s *CATestSuite) TestCA_Issue_WithOptions_Effective() {
+	// Given
+	fca := trustme.New(s.T())
+
+	// When
+	crt := fca.MustIssue(
+		cert.WithOptions(
+			cert.WithRSABits(1024),
+			cert.WithTTL(time.Minute*123),
+		),
+	)
+
+	// Then
+	s.Require().Equal(1024/8, crt.Key.Size(), "Key should have size set via options")
+	s.Require().Equal(
+		time.Minute*123, crt.Certificate.NotAfter.Sub(crt.Certificate.NotBefore),
+		"Certificate should have TTL set via CA options",
+	)
+}
 
 func (s *CATestSuite) TestCA_Issue_SerialNumberChanges() {
 	// Given

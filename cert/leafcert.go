@@ -3,6 +3,8 @@ package cert
 import (
 	"crypto/rsa"
 	"crypto/x509"
+	"net"
+	"net/url"
 	"time"
 )
 
@@ -22,12 +24,17 @@ type Config struct {
 
 	CommonName   string
 	Organization string
+
+	DNSNames       []string
+	EmailAddresses []string
+	IPAddresses    []net.IP
+	URIs           []*url.URL
 }
 
 // Option configures the issued certificate.
 type Option func(cfg *Config)
 
-// WithOptions turns a list of LeafOption instances into an LeafOption.
+// WithOptions turns a list of Option instances into an Option.
 func WithOptions(opts ...Option) Option {
 	return func(cfg *Config) {
 		for _, opt := range opts {
@@ -36,21 +43,21 @@ func WithOptions(opts ...Option) Option {
 	}
 }
 
-// WithTTL configures time to live for the CA and issued certificates.
+// WithTTL configures time to live of the issued certificate.
 func WithTTL(ttl time.Duration) Option {
 	return func(cfg *Config) {
 		cfg.TTL = ttl
 	}
 }
 
-// WithRSABits configures the length of RSA private key of the CA and the issued certificates.
+// WithRSABits configures the length of RSA private key issued certificate.
 func WithRSABits(rsaBits int) Option {
 	return func(cfg *Config) {
 		cfg.RSABits = rsaBits
 	}
 }
 
-// WithCommonName configures the CA's common name.
+// WithCommonName configures common name of the issued certificate.
 func WithCommonName(commonName string) Option {
 	return func(cfg *Config) {
 		cfg.CommonName = commonName
