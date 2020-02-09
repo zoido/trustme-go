@@ -86,6 +86,30 @@ func (s *CATestSuite) TestCA_WithRSABits_Effective() {
 	s.Require().Equal(512/8, a.Cert.Key.Size(), "Key should have size set via options")
 }
 
+func (s *CATestSuite) TestCA_WithCommonName_Effective() {
+	// When
+	a, err := ca.New(ca.WithCommonName("test-CN"))
+
+	// Then
+	s.Require().NoError(err)
+	s.Require().Equal(
+		"test-CN", a.Cert.Certificate.Subject.CommonName,
+		"CA certificate should have CN set via options",
+	)
+}
+
+func (s *CATestSuite) TestCA_WithOrganization_Effective() {
+	// When
+	a, err := ca.New(ca.WithOrganization("Trust Me, Org."))
+
+	// Then
+	s.Require().NoError(err)
+	s.Require().Equal(
+		"Trust Me, Org.", a.Cert.Certificate.Subject.Organization[0],
+		"CA certificate should have O set via options",
+	)
+}
+
 func (s *CATestSuite) TestCA_Issue_Ok() {
 	// Given
 	a := s.mustCreateCA()
@@ -150,6 +174,36 @@ func (s *CATestSuite) TestCA_Issue_DefaultRSaBits_Effective() {
 	// Then
 	s.Require().NoError(err)
 	s.Require().Equal(1024/8, crt.Key.Size(), "Key should have size set via options")
+}
+
+func (s *CATestSuite) TestCA_Issue_DefaultCommonName_Effective() {
+	// Given
+	a, err := ca.New(ca.WithCommonName("test-CN"))
+
+	// When
+	crt, err := a.Issue()
+
+	// Then
+	s.Require().NoError(err)
+	s.Require().Regexp(
+		"^test-CN:", crt.Certificate.Subject.CommonName,
+		"Certificate should have CN set via options",
+	)
+}
+
+func (s *CATestSuite) TestCA_Issue_DefaultOrganization_Effective() {
+	// Given
+	a, err := ca.New(ca.WithOrganization("Trust Me, Org."))
+
+	// When
+	crt, err := a.Issue()
+
+	// Then
+	s.Require().NoError(err)
+	s.Require().Equal(
+		"Trust Me, Org.", crt.Certificate.Subject.Organization[0],
+		"Certificate should have O set via options",
+	)
 }
 
 func (s *CATestSuite) TestCA_Issue_SerialNumberChanges() {
