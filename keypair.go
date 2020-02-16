@@ -10,20 +10,21 @@ import (
 	"testing"
 )
 
-// KeyPair represents server or client certificate
+// KeyPair represents server or client certificate.
 type KeyPair struct {
-	t *testing.T
+	t         *testing.T
+	authority *Authority
 
 	privateKey  *rsa.PrivateKey
 	certificate *x509.Certificate
 }
 
-// Certificate returns public certificate of KeyPair.
+// Certificate returns public certificate of the KeyPair.
 func (kp *KeyPair) Certificate() *x509.Certificate {
 	return kp.certificate
 }
 
-// Key returns private key of th KeyPair.
+// Key returns private key of the KeyPair.
 func (kp *KeyPair) Key() *rsa.PrivateKey {
 	return kp.privateKey
 }

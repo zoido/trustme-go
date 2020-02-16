@@ -18,7 +18,7 @@ func TestKeyPairTestSuite(t *testing.T) {
 	suite.Run(t, new(KeyPairTestSuite))
 }
 
-func (s *KeyPairTestSuite) Test_CertificatePEM() {
+func (s *KeyPairTestSuite) TestCertificatePEM() {
 	// Given
 	ca := trustme.New(s.T())
 	kp := ca.MustIssue(trustme.WithCommonName("TESTING CERTIFICATE"))
@@ -35,7 +35,7 @@ func (s *KeyPairTestSuite) Test_CertificatePEM() {
 	s.Require().Equal("TESTING CERTIFICATE", crt.Subject.CommonName)
 }
 
-func (s *KeyPairTestSuite) Test_KeyPEM() {
+func (s *KeyPairTestSuite) TestKeyPEM() {
 	// Given
 	ca := trustme.New(s.T())
 	kp := ca.MustIssue()

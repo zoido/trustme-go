@@ -133,6 +133,24 @@ func (s *CATestSuite) TestCA_MultipleOptions_Effective() {
 	)
 }
 
+func (s *CATestSuite) TestCA_CertPool() {
+	// Given
+	cn := "TESTING CA"
+	o := "Testing Organization"
+	fca := trustme.New(
+		s.T(),
+		trustme.WithCommonName(cn),
+		trustme.WithOrganization(o),
+	)
+
+	// When
+	pool := fca.CertPool()
+
+	// Then
+	s.Require().Len(pool.Subjects(), 1, "CertPool needs to obtain only the CA's certificate")
+	s.Require().Equal(fca.Certificate().RawSubject, pool.Subjects()[0])
+}
+
 func (s *CATestSuite) TestCA_Issue_Ok() {
 	// Given
 	fca := trustme.New(s.T())
