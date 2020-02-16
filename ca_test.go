@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/suite"
+
 	"github.com/zoido/trustme-go"
 )
 
