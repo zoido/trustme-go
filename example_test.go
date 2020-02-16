@@ -13,7 +13,7 @@ import (
 	"github.com/zoido/trustme-go"
 )
 
-func ExampleHandler(w http.ResponseWriter, r *http.Request) {
+func exampleHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.TLS.PeerCertificates) == 0 {
 		http.Error(w, "Requires mTLS", http.StatusUnauthorized)
 		return
@@ -38,7 +38,7 @@ func TestExample(t *testing.T) {
 	defer listener.Close()
 
 	srv := http.Server{
-		Handler: http.HandlerFunc(ExampleHandler),
+		Handler: http.HandlerFunc(exampleHandler),
 	}
 	defer srv.Close()
 	go srv.Serve(listener)
@@ -64,4 +64,34 @@ func TestExample(t *testing.T) {
 	if bytes.Compare(b, []byte("TEST CLIENT")) != 0 {
 		t.Fatal("Server did not return expected peer CN")
 	}
+}
+
+func Example() {
+	ca := trustme.New(&testing.T{})
+
+	srvCfg := ca.MustIssue(trustme.WithIP(net.ParseIP("127.0.0.1"))).AsServerConfig()
+	srvCfg.ClientAuth = tls.RequireAndVerifyClientCert
+	listener, _ := tls.Listen("tcp", "127.0.0.1:0", srvCfg)
+	defer listener.Close()
+
+	srv := http.Server{
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if len(r.TLS.PeerCertificates) == 0 {
+				http.Error(w, "Requires mTLS", http.StatusUnauthorized)
+			}
+		}),
+	}
+	defer srv.Close()
+	go srv.Serve(listener)
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: ca.MustIssue().AsClientConfig(),
+		},
+		Timeout: time.Second * 5,
+	}
+
+	client.Get(fmt.Sprintf("https://%s/", listener.Addr().String()))
+
+	// ...
 }
