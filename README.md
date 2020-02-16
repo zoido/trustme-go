@@ -6,6 +6,7 @@
 
 [![Go](https://github.com/zoido/trustme-go/workflows/Go/badge.svg)](https://github.com/zoido/trustme-go/actions?query=workflow%3AGo)
 [![codecov](https://codecov.io/gh/zoido/trustme-go/branch/master/graph/badge.svg)](https://codecov.io/gh/zoido/trustme-go)
+[![GoDoc](https://godoc.org/github.com/zoido/trustme-go?status.svg)](https://godoc.org/github.com/zoido/trustme-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/zoido/trustme-go)](https://goreportcard.com/report/github.com/zoido/trustme-go)
 
 Inspired by [trustme](https://github.com/python-trio/trustme)
