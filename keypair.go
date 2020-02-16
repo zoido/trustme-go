@@ -3,6 +3,7 @@ package trustme
 import (
 	"bytes"
 	"crypto/rsa"
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -57,4 +58,31 @@ func (kp *KeyPair) CertificatePEM() []byte {
 		kp.t.Error(fmt.Errorf("PEM encoding KeyPair's certificate: %w", err))
 	}
 	return buff.Bytes()
+}
+
+// AsX509KeyPair returns content KeyPair as tls.Certificate.
+func (kp *KeyPair) AsX509KeyPair() tls.Certificate {
+	cert, err := tls.X509KeyPair(kp.CertificatePEM(), kp.KeyPEM())
+	if err != nil {
+		kp.t.Error(fmt.Errorf("loading KeyPair's PEM content: %w", err))
+	}
+	return cert
+}
+
+// AsServerConfig returns tls.Config for the server KeyPair's public certificate and private
+// prefilled.
+func (kp *KeyPair) AsServerConfig() *tls.Config {
+	return &tls.Config{
+		Certificates: []tls.Certificate{kp.AsX509KeyPair()},
+		ClientCAs:    kp.authority.CertPool(),
+	}
+}
+
+// AsClientConfig returns tls.Config for the client KeyPair's public certificate and private
+// prefilled.
+func (kp *KeyPair) AsClientConfig() *tls.Config {
+	return &tls.Config{
+		Certificates: []tls.Certificate{kp.AsX509KeyPair()},
+		RootCAs:      kp.authority.CertPool(),
+	}
 }

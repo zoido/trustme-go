@@ -1,6 +1,7 @@
 package trustme_test
 
 import (
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
 	"testing"
@@ -49,4 +50,43 @@ func (s *KeyPairTestSuite) TestKeyPEM() {
 	s.Require().Equal("RSA PRIVATE KEY", block.Type, "Decoded type has tu be RSA PRIVATE KEY")
 	_, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	s.Require().NoError(err, "Result data has to be parsable as x509 private key again")
+}
+
+func (s *KeyPairTestSuite) TestAsX509KeyPair() {
+	// Given
+	ca := trustme.New(s.T())
+	kp := ca.MustIssue()
+
+	// When
+	c := kp.AsX509KeyPair()
+
+	// Then
+	s.Require().Equal(kp.Key(), c.PrivateKey)
+	s.Require().Equal(kp.Certificate().Raw, c.Certificate[0])
+}
+
+func (s *KeyPairTestSuite) TestAsServerConfig() {
+	// Given
+	ca := trustme.New(s.T())
+	kp := ca.MustIssue()
+
+	// When
+	cfg := kp.AsServerConfig()
+
+	// Then
+	s.Require().Equal(ca.CertPool(), cfg.ClientCAs)
+	s.Require().Equal([]tls.Certificate{kp.AsX509KeyPair()}, cfg.Certificates)
+}
+
+func (s *KeyPairTestSuite) TestAsClientConfig() {
+	// Given
+	ca := trustme.New(s.T())
+	kp := ca.MustIssue()
+
+	// When
+	cfg := kp.AsClientConfig()
+
+	// Then
+	s.Require().Equal(ca.CertPool(), cfg.RootCAs)
+	s.Require().Equal([]tls.Certificate{kp.AsX509KeyPair()}, cfg.Certificates)
 }
