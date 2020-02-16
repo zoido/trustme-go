@@ -66,6 +66,13 @@ func (a *Authority) Key() *rsa.PrivateKey {
 	return a.keyPair.privateKey
 }
 
+// CertPool x509.CertPool that contains fake CA's certificate.
+func (a *Authority) CertPool() *x509.CertPool {
+	pool := x509.NewCertPool()
+	pool.AddCert(a.Certificate())
+	return pool
+}
+
 // MustIssue issues new certificate signed by the CA. Fails the test
 func (a *Authority) MustIssue(options ...IssueOption) *KeyPair {
 	cfg := issueConfig{
@@ -90,7 +97,10 @@ func (a *Authority) MustIssue(options ...IssueOption) *KeyPair {
 
 func (a *Authority) issueCertificate(cfg issueConfig) (*KeyPair, error) {
 	var err error
-	pair := &KeyPair{}
+	pair := &KeyPair{
+		t:         a.t,
+		authority: a,
+	}
 
 	pair.privateKey, err = generateKey(cfg.rsaBits)
 	if err != nil {
@@ -179,12 +189,6 @@ func (a *Authority) initialize() error {
 	return nil
 }
 
-func (a *Authority) checkError(err error) {
-	if err != nil {
-		a.t.Error(err)
-	}
-}
-
 func generateKey(bits int) (*rsa.PrivateKey, error) {
 	key, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
@@ -222,4 +226,10 @@ func generateCSR(cfg issueConfig, key *rsa.PrivateKey) (*x509.CertificateRequest
 	}
 
 	return csr, nil
+}
+
+func (a *Authority) checkError(err error) {
+	if err != nil {
+		a.t.Error(err)
+	}
 }

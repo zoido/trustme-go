@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/suite"
+
 	"github.com/zoido/trustme-go"
 )
 
@@ -130,6 +131,24 @@ func (s *CATestSuite) TestCA_MultipleOptions_Effective() {
 		time.Minute*123, fca.Certificate().NotAfter.Sub(fca.Certificate().NotBefore),
 		"CA certificate should have TTL set via CA options",
 	)
+}
+
+func (s *CATestSuite) TestCA_CertPool() {
+	// Given
+	cn := "TESTING CA"
+	o := "Testing Organization"
+	fca := trustme.New(
+		s.T(),
+		trustme.WithCommonName(cn),
+		trustme.WithOrganization(o),
+	)
+
+	// When
+	pool := fca.CertPool()
+
+	// Then
+	s.Require().Len(pool.Subjects(), 1, "CertPool needs to obtain only the CA's certificate")
+	s.Require().Equal(fca.Certificate().RawSubject, pool.Subjects()[0])
 }
 
 func (s *CATestSuite) TestCA_Issue_Ok() {
