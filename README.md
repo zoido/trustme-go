@@ -37,12 +37,12 @@ func TestExample(t *testing.T) {
 	defer srv.Close()
 	go srv.Serve(listener)
 
-    client := &http.Client{
+	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: ca.MustIssue().AsClientConfig(),
 		},
 		Timeout: time.Second * 5,
-    }
+	}
 
 	client.Get(fmt.Sprintf("https://%s/", listener.Addr().String()))
 }
