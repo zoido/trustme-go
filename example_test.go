@@ -61,7 +61,7 @@ func TestExample(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if bytes.Compare(b, []byte("TEST CLIENT")) != 0 {
+	if !bytes.Equal(b, []byte("TEST CLIENT")) {
 		t.Fatal("Server did not return expected peer CN")
 	}
 }

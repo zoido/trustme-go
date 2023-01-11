@@ -6,22 +6,13 @@ import (
 	"encoding/pem"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
-
+	"github.com/stretchr/testify/require"
 	"github.com/zoido/trustme-go"
 )
 
-type KeyPairTestSuite struct {
-	suite.Suite
-}
-
-func TestKeyPairTestSuite(t *testing.T) {
-	suite.Run(t, new(KeyPairTestSuite))
-}
-
-func (s *KeyPairTestSuite) TestCertificatePEM() {
+func TestCertificatePEM(t *testing.T) {
 	// Given
-	ca := trustme.New(s.T())
+	ca := trustme.New(t)
 	kp := ca.MustIssue(trustme.WithCommonName("TESTING CERTIFICATE"))
 
 	// When
@@ -29,16 +20,16 @@ func (s *KeyPairTestSuite) TestCertificatePEM() {
 
 	// Then
 	block, _ := pem.Decode(c)
-	s.Require().NotNil(block, "Result data has to be de-codable as PEM")
-	s.Require().Equal("CERTIFICATE", block.Type, "Decoded type has tu be CERTIFICATE")
+	require.NotNil(t, block, "Result data has to be de-codable as PEM")
+	require.Equal(t, "CERTIFICATE", block.Type, "Decoded type has tu be CERTIFICATE")
 	crt, err := x509.ParseCertificate(block.Bytes)
-	s.Require().NoError(err, "Result data has to be parsable as x509 certificate again")
-	s.Require().Equal("TESTING CERTIFICATE", crt.Subject.CommonName)
+	require.NoError(t, err, "Result data has to be parsable as x509 certificate again")
+	require.Equal(t, "TESTING CERTIFICATE", crt.Subject.CommonName)
 }
 
-func (s *KeyPairTestSuite) TestKeyPEM() {
+func TestKeyPEM(t *testing.T) {
 	// Given
-	ca := trustme.New(s.T())
+	ca := trustme.New(t)
 	kp := ca.MustIssue()
 
 	// When
@@ -46,47 +37,47 @@ func (s *KeyPairTestSuite) TestKeyPEM() {
 
 	// Then
 	block, _ := pem.Decode(c)
-	s.Require().NotNil(block, "Result data has to be de-codable as PEM")
-	s.Require().Equal("RSA PRIVATE KEY", block.Type, "Decoded type has tu be RSA PRIVATE KEY")
+	require.NotNil(t, block, "Result data has to be de-codable as PEM")
+	require.Equal(t, "RSA PRIVATE KEY", block.Type, "Decoded type has tu be RSA PRIVATE KEY")
 	_, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	s.Require().NoError(err, "Result data has to be parsable as x509 private key again")
+	require.NoError(t, err, "Result data has to be parsable as x509 private key again")
 }
 
-func (s *KeyPairTestSuite) TestAsX509KeyPair() {
+func TestAsX509KeyPair(t *testing.T) {
 	// Given
-	ca := trustme.New(s.T())
+	ca := trustme.New(t)
 	kp := ca.MustIssue()
 
 	// When
 	c := kp.AsX509KeyPair()
 
 	// Then
-	s.Require().Equal(kp.Key(), c.PrivateKey)
-	s.Require().Equal(kp.Certificate().Raw, c.Certificate[0])
+	require.Equal(t, kp.Key(), c.PrivateKey)
+	require.Equal(t, kp.Certificate().Raw, c.Certificate[0])
 }
 
-func (s *KeyPairTestSuite) TestAsServerConfig() {
+func TestAsServerConfig(t *testing.T) {
 	// Given
-	ca := trustme.New(s.T())
+	ca := trustme.New(t)
 	kp := ca.MustIssue()
 
 	// When
 	cfg := kp.AsServerConfig()
 
 	// Then
-	s.Require().Equal(ca.CertPool(), cfg.ClientCAs)
-	s.Require().Equal([]tls.Certificate{kp.AsX509KeyPair()}, cfg.Certificates)
+	require.Equal(t, ca.CertPool(), cfg.ClientCAs)
+	require.Equal(t, []tls.Certificate{kp.AsX509KeyPair()}, cfg.Certificates)
 }
 
-func (s *KeyPairTestSuite) TestAsClientConfig() {
+func TestAsClientConfig(t *testing.T) {
 	// Given
-	ca := trustme.New(s.T())
+	ca := trustme.New(t)
 	kp := ca.MustIssue()
 
 	// When
 	cfg := kp.AsClientConfig()
 
 	// Then
-	s.Require().Equal(ca.CertPool(), cfg.RootCAs)
-	s.Require().Equal([]tls.Certificate{kp.AsX509KeyPair()}, cfg.Certificates)
+	require.Equal(t, ca.CertPool(), cfg.RootCAs)
+	require.Equal(t, []tls.Certificate{kp.AsX509KeyPair()}, cfg.Certificates)
 }
