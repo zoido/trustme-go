@@ -1,3 +1,7 @@
+> [!NOTE]
+> Repo is archived. 2026-10-28 I found this project unmaintained with broken CI.
+> I do not use it anymore personally, therefore archive.
+
 <!-- markdownlint-disable MD026 -->
 
 # Trust me. Go!
