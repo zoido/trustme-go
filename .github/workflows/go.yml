@@ -44,7 +44,7 @@ jobs:
         run: revive -config ci/revive.toml ./...
 
       - name: markdownlint
-        uses: nosborn/github-action-markdown-cli@v1.1.1
+        uses: nosborn/github-action-markdown-cli@v3.5.0
         with:
           files: .
 
