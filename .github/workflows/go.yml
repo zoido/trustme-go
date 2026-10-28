@@ -35,7 +35,7 @@ jobs:
         if: steps.cachelinters.outputs.cache-hit != 'true'
 
       - name: check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
 
       - name: goimports
         run: goimports -d .
@@ -57,7 +57,7 @@ jobs:
         with:
           go-version: 1.13
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v7
 
       - name: cache dependencies
         uses: actions/cache@v1
@@ -85,7 +85,7 @@ jobs:
         with:
           go-version: 1.13
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v7
 
       - name: cache dependencies
         uses: actions/cache@v1
